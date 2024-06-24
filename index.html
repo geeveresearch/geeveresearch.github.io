@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geeve George - AI Researcher & PhD Student</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/ScrollMagic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/plugins/animation.gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        :root {
+            --primary-color: #00ff00;
+            --secondary-color: #0099ff;
+            --text-color: #e0e0e0;
+            --background-color: #000000;
+            --neon-glow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color), 0 0 30px var(--primary-color);
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            perspective: 1000px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+            transform-style: preserve-3d;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0,0,0,0.7) 0%, rgba(0,50,0,0.5) 100%);
+            z-index: 0;
+        }
+
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            font-size: 4em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-shadow: var(--neon-glow);
+            animation: glitch 5s infinite;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: var(--neon-glow); }
+            25% { text-shadow: -2px 0 var(--secondary-color), 2px 2px var(--primary-color); }
+            50% { text-shadow: 2px -2px var(--primary-color), -2px 2px var(--secondary-color); }
+            75% { text-shadow: -2px -2px var(--secondary-color), 2px 2px var(--primary-color); }
+            100% { text-shadow: var(--neon-glow); }
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px var(--secondary-color);
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+            box-sizing: border-box;
+            background: rgba(0, 20, 0, 0.8);
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            transform: translateZ(0);
+            transition: transform 0.3s;
+        }
+
+        section:hover {
+            transform: translateZ(50px) rotateX(5deg) rotateY(5deg);
+        }
+
+        .project {
+            background: rgba(0, 50, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+        }
+
+        .project:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.4);
+        }
+
+        #threeJsCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .skill-category {
+            margin-bottom: 30px;
+        }
+
+        .skill-category h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+
+        .skill-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .skill-name {
+            width: 150px;
+            font-weight: bold;
+        }
+
+        .skill-level {
+            flex-grow: 1;
+            height: 20px;
+            position: relative;
+            background: rgba(0, 50, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2) inset;
+        }
+
+        .skill-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            width: 0;
+            transition: width 1s ease-out;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .skill-percentage {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8em;
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+
+        .award {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 50, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid var(--secondary-color);
+            box-shadow: 0 0 10px rgba(0, 153, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .award:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 5px 15px rgba(0, 153, 255, 0.4);
+        }
+
+        .award h4 {
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px var(--secondary-color);
+        }
+
+        .award p {
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary-color);
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease;
+        }
+
+        a:hover {
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+
+        a:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.1;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="threeJsCanvas"></canvas>
+    <canvas id="matrixCanvas" class="matrix-bg"></canvas>
+    <div class="overlay"></div>
+    
+    <div class="container">
+        <header>
+            <h1 class="glitch">Geeve George</h1>
+            <h2 id="typewriter"></h2>
+        </header>
+
+        <section id="about">
+            <h2><span class="emoji">👨‍🔬</span>About Me</h2>
+            <p>I'm a 1st year Machine Learning PhD student at the Hong Kong University of Science and Technology (HKUST), working under the guidance of Prof Huamin Qu in the VisLab. My research interests include Large Language Models, Computer Vision, and Generative AI.</p>
+            <p>GitHub: <a href="https://github.com/GeeveGeorge" target="_blank">https://github.com/GeeveGeorge</a></p>
+            <p>Email: geeve@connect.ust.hk</p>
+        </section>
+
+        <section id="education">
+            <h2><span class="emoji">🎓</span>Education</h2>
+            <h3>Hong Kong University of Science and Technology</h3>
+            <p>PhD Student, Machine Learning & Human-Computer Interaction (Current)</p>
+            <h3>Anna University</h3>
+            <p>Bachelor of Computer Science Engineering (2017-2021)</p>
+            <p>GPA: 8.2/10</p>
+            <p>Relevant courses: Machine Learning, Data Mining, Neural Networks, Artificial Intelligence, Data Structures and Algorithms, Object-Oriented Programming, Computer Vision, Operations Research</p>
+        </section>
+
+        <section id="experience">
+            <h2><span class="emoji">💼</span>Research Experience</h2>
+            <div class="project">
+                <h3>AI Researcher @ Miko.ai</h3>
+                <p>May 2021 - June 2023</p>
+                <p>Worked on Large Language Models and Diffusion Models for Image and Music generation.</p>
+            </div>
+            <div class="project">
+                <h3>Research Assistant @ HKUST Xmed Lab</h3>
+                <p>Current</p>
+                <p>Working on Diffusion Models for medical imaging applications.</p>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2><span class="emoji">🚀</span>Key Projects</h2>
+            <div class="project">
+                <h3>Stable Craiyon: Combining Stable Diffusion + DALL-E Mini</h3>
+                <p>Used the Img2Img feature of Stable Diffusion to feed the model the output from DALL-E Mini, significantly improving the image/art outputs generated by Stable Diffusion. This project has gained over 100 stars on GitHub.</p>
+            </div>
+            <div class="project">
+                <h3>Panini-Net: GAN Prior based Degradation-Aware Feature Interpolation for Face Restoration</h3>
+                <p>Contributed to this open-source project by writing the official Colab inference notebook, which includes options for both Face Restoration and Super Resolution.</p>
+            </div>
+            <div class="project">
+                <h3>SAMIS: Real-time Vein Imaging System</h3>
+                <p>Developed a low-cost and novel vein imaging technique using a smartphone camera and biomedical imaging techniques. This project won the Intel ISEF 2017 Grand Award.</p>
+            </div>
+            <div class="project">
+                <h3>Synaspeak: Wearable Eye Blink to Speech AAC Device</h3>
+                <p>Developed a low-cost Eye Blink to speech AAC device for users with motor neuron disabilities. This project won the RESNA Student Design Challenge 2020.</p>
+            </div>
+        </section>
+
+        <section id="awards">
+            <h2><span class="emoji">🏆</span>Awards and Honors</h2>
+            <div class="award">
+                <h4>HKSTP Incubation Programme 2024 Awardee</h4>
+                <p>Selected for the HKSTP Incubation Programme, receiving HKD 100,000 in seed funding for my startup project "Eleuto".</p>
+            </div>
+            <div class="award">
+                <h4>HKUST DreamBuilder 2024 Awardee</h4>
+                <p>Selected for the HKUST Dreambuilder programme, receiving HKD 20,000 in seed funding for my startup project "Eleuto".</p>
+            </div>
+            <div class="award">
+                <h4>RedBird PhD Award (2023)</h4>
+                <p>Received the HKUST RedBird PhD Award, which includes a HKD 40,000 scholarship and tuition fee waiver.</p>
+            </div>
+            <div class="award">
+                <h4>IIMB $10,000 USD Seed Fund Grant Award</h4>
+                <p>Awarded to the top 0.2% of applicants (20 out of 10,000) for a medical venture focused on preventing End Stage Kidney Disease in diabetic patients.</p>
+            </div>
+            <div class="award">
+                <h4>RESNA Student Design Challenge 2020 Winner</h4>
+                <p>Won the Student Design Challenge award of USD $1,000 for the Synaspeak project.</p>
+            </div>
+            <div class="award">
+                <h4>Intel ISEF 2017 2nd Place Grand Award Winner</h4>
+                <p>Won in the Biomedical Engineering Category for the SAMIS project.</p>
+            </div>
+            <div class="award">
+                <h4>MIT Lincoln Laboratory's Ceres Connection Award</h4>
+                <p>Received at Intel ISEF 2017. An asteroid (34017 Geeve) was named after me by IAU and NASA JPL.</p>
+            </div>
+            <div class="award">
+                <h4>Google Science Fair 2015 Regional Finalist</h4>
+                <p>Selected among the Top 90 Regional Finalists worldwide for developing Magniwear: A Wearable Digital Microscope.</p>
+            </div>
+        </section>
+
+        <section id="publications">
+            <h2><span class="emoji">📚</span>Conference Presentations and Talks</h2>
+            <div class="publication">
+                <h4>"Eye Blink to Speech AAC Device Using a Low Cost Consumer EEG Headset"</h4>
+                <p>Presented at the RESNA Annual Conference - 2020</p>
+            </div>
+            <div class="publication">
+                <h4>"Making a difference with code"</h4>
+                <p>TEDxManipalUniversity Talk</p>
+                <p><a href="https://www.youtube.com/watch?v=MMXUI9CTV7U" target="_blank">Watch the talk</a></p>
+            </div>
+        </section>
+
+        <section id="patent">
+            <h2><span class="emoji">📜</span>Patent</h2>
+            <div class="patent">
+                <h4>SYSTEM AND METHOD FOR AUGMENTATIVE AND ALTERNATIVE COMMUNICATION FROM MORSE CODE</h4>
+                <p>Indian Patent (2020), OFFICIAL JOURNAL OF THE PATENT OFFICE, GOVT OF INDIA. Page No: 319</p>
+                <p><a href="https://ipindia.gov.in/writereaddata/Portal/IPOJournal/1_4863_1/Part-1.pdf" target="_blank">View Patent</a></p>
+            </div>
+        </section>
+
+        <section id="skills">
+            <h2><span class="emoji">🔧</span>Technical Skills</h2>
+            
+            <div class="skill-category">
+                <h3>Programming Languages</h3>
+                <div class="skill-item">
+                    <div class="skill-name">Python</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="100"></div>
+                        <div class="skill-percentage">Expert</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">C++</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="90"></div>
+                        <div class="skill-percentage">Advanced</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Java</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="80"></div>
+                        <div class="skill-percentage">Intermediate</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="skill-category">
+                <h3>ML Frameworks & Libraries</h3>
+                <div class="skill-item">
+                    <div class="skill-name">PyTorch</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="100"></div>
+                        <div class="skill-percentage">Expert</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">TensorFlow</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="90"></div>
+                        <div class="skill-percentage">Advanced</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Hugging Face</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="90"></div>
+                        <div class="skill-percentage">Advanced</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="skill-category">
+                <h3>Tools & Platforms</h3>
+                <div class="skill-item">
+                    <div class="skill-name">Git</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="90"></div>
+                        <div class="skill-percentage">Advanced</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Docker</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="80"></div>
+                        <div class="skill-percentage">Proficient</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Google Cloud Platform</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="80"></div>
+                        <div class="skill-percentage">Proficient</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="skill-category">
+                <h3>Hardware</h3>
+                <div class="skill-item">
+                    <div class="skill-name">Arduino</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="90"></div>
+                        <div class="skill-percentage">Advanced</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Raspberry Pi</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="90"></div>
+                        <div class="skill-percentage">Advanced</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">TI-LAUNCHPAD</div>
+                    <div class="skill-level">
+                        <div class="skill-bar" data-width="80"></div>
+                        <div class="skill-percentage">Proficient</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Three.js setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('threeJsCanvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Create a more complex 3D object
+        const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+        const torusKnot = new THREE.Mesh(geometry, material);
+        scene.add(torusKnot);
+
+        camera.position.z = 30;
+
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+            torusKnot.rotation.x += 0.01;
+            torusKnot.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Scroll animations
+        const controller = new ScrollMagic.Controller();
+
+        document.querySelectorAll('section').forEach((section, index) => {
+            new ScrollMagic.Scene({
+                triggerElement: section,
+                triggerHook: 0.9,
+            })
+            .setClassToggle(section, 'visible')
+            .addTo(controller);
+
+            gsap.from(section, {
+                opacity: 0,
+                y: 50,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%",
+                    end: "top 50%",
+                    scrub: true
+                }
+            });
+        });
+
+        // Skill bar animation
+        document.querySelectorAll('.skill-bar').forEach(bar => {
+            new ScrollMagic.Scene({
+                triggerElement: bar,
+                triggerHook: 0.9,
+            })
+            .on('enter', function () {
+                bar.style.width = bar.getAttribute('data-width') + '%';
+            })
+            .addTo(controller);
+        });
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Typewriter effect
+        const typewriter = document.getElementById('typewriter');
+        const text = "AI Researcher | PhD Student in Machine Learning";
+        let i = 0;
+        function typeWriter() {
+            if (i < text.length) {
+                typewriter.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50);
+            }
+        }
+        typeWriter();
+
+        // Matrix background
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+
+        const characters = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const fontSize = 10;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#0f0";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 33);
+    </script>
+</body>
+</html>
